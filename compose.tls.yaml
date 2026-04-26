@@ -1,0 +1,28 @@
+services:
+  nginx:
+    ports:
+      - "${NGINX_HTTP_PORT:-8080}:80"
+      - "${NGINX_HTTPS_PORT:-8443}:443"
+    volumes:
+      - ./nginx/tls.conf:/etc/nginx/conf.d/90-tls.conf:ro
+      - ./nginx/tls/http-redirect.conf:/etc/nginx/snippets/http-redirect.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+
+  certgen:
+    image: alpine:3.20
+    working_dir: /work
+    entrypoint:
+      - /bin/sh
+      - -c
+    command: >-
+      apk add --no-cache openssl >/dev/null &&
+      mkdir -p /work/nginx/certs &&
+      openssl req -x509 -nodes -newkey rsa:2048
+      -keyout /work/nginx/certs/lab.key
+      -out /work/nginx/certs/lab.crt
+      -days 365
+      -subj '/CN=localhost'
+    volumes:
+      - .:/work
+    profiles:
+      - setup

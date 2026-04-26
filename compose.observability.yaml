@@ -1,0 +1,23 @@
+services:
+  toolbox:
+    image: nicolaka/netshoot:latest
+    command:
+      - sleep
+      - infinity
+    networks:
+      - lab
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.4.2
+    command:
+      - --nginx.scrape-uri=http://nginx/nginx_status
+    depends_on:
+      - nginx
+    ports:
+      - "${NGINX_EXPORTER_PORT:-9113}:9113"
+    networks:
+      - lab
+
+networks:
+  lab:
+    external: false

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nginx Docker Lab</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #102033;
+      --muted: #506176;
+      --paper: rgba(255, 255, 255, 0.88);
+      --accent: #b34d28;
+      --edge: #d4dce6;
+      --bg-a: #f3ead8;
+      --bg-b: #d7e3ef;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(179, 77, 40, 0.12), transparent 30%),
+        linear-gradient(140deg, var(--bg-a), var(--bg-b));
+    }
+
+    main {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    h1,
+    h2 {
+      line-height: 1.05;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 8vw, 5.5rem);
+      margin-bottom: 1rem;
+      max-width: 10ch;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .hero,
+    .panel {
+      background: var(--paper);
+      border: 1px solid rgba(16, 32, 51, 0.08);
+      box-shadow: 0 18px 56px rgba(16, 32, 51, 0.12);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      padding: 2rem;
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    }
+
+    .panel {
+      padding: 1.5rem;
+    }
+
+    code {
+      padding: 0.15rem 0.35rem;
+      background: rgba(16, 32, 51, 0.08);
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--muted);
+    }
+
+    li + li {
+      margin-top: 0.5rem;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.78rem;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Nginx Docker Lab</div>
+      <h1>Observe how traffic actually moves.</h1>
+      <p>
+        This stack gives you a local edge proxy, two app upstreams, one API backend, optional TLS,
+        optional WebSockets, and an observability overlay. Use it to inspect routing, forwarding
+        headers, load balancing, rate limits, cache behavior, and HTTP to HTTPS redirects.
+      </p>
+      <p>
+        Start with <code>/app/</code>, <code>/api/headers</code>, <code>/cache/demo</code>, and
+        <code>/limited/delay/1</code>. Then switch to host-based routing with a Host header such as
+        <code>app.lab.local</code> or <code>api.lab.local</code>.
+      </p>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>Path routes</h2>
+        <ul>
+          <li><code>/app/</code> load balances between <code>app-a</code> and <code>app-b</code>.</li>
+          <li><code>/api/</code> proxies directly to the API backend.</li>
+          <li><code>/secure/</code> adds basic auth. Use <code>student</code> and <code>labpass</code>.</li>
+          <li><code>/cache/demo</code> shows <code>X-Cache-Status</code> on repeated requests.</li>
+          <li><code>/ws/</code> becomes active when the <code>ws</code> profile is running.</li>
+        </ul>
+      </article>
+
+      <article class="panel">
+        <h2>Host routes</h2>
+        <ul>
+          <li>Send <code>Host: app.lab.local</code> to reach the app pool at the root path.</li>
+          <li>Send <code>Host: api.lab.local</code> to reach the API backend at the root path.</li>
+          <li>Use this to compare virtual host routing with path-based routing.</li>
+        </ul>
+      </article>
+
+      <article class="panel">
+        <h2>Control loop</h2>
+        <ul>
+          <li>Test config with <code>docker compose exec nginx nginx -t</code>.</li>
+          <li>Reload with <code>docker compose exec nginx nginx -s reload</code>.</li>
+          <li>Watch logs with <code>docker compose logs -f nginx</code>.</li>
+          <li>Inspect status at <code>/nginx_status</code> from the observability overlay.</li>
+        </ul>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
