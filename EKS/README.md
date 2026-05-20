@@ -1,82 +1,167 @@
-# EKS Upgrade Prerequisites
+# EKS Upgrade Checklist
 
-Before upgrading an EKS cluster, treat these as mandatory prerequisites:
+Use this checklist as a reusable pre-upgrade procedure for Amazon EKS cluster upgrades.
 
-## 1. Define the upgrade strategy
+Detailed completion guidance for each checklist section is in [README-CHECK-GUIDE.md](README-CHECK-GUIDE.md).
+Execution-day steps are in [UPGRADE-RUNBOOK.md](UPGRADE-RUNBOOK.md).
 
-- Confirm the current Kubernetes/EKS version, target version, and supported hop sequence. EKS upgrades should be done one minor version at a time.
-- Decide whether the upgrade is `in-place` or `blue/green`.
-- Plan rollback correctly: EKS control plane downgrade is not supported, so rollback means failover to another cluster or restore/redeploy, not version rollback.
-- Set a maintenance window, change freeze, owners, and clear go/no-go criteria.
+## Upgrade Metadata
 
-## 2. Inventory the full cluster
+- [ ] Cluster name: `________________________`
+- [ ] Environment: `dev / test / stage / prod`
+- [ ] AWS account ID: `________________________`
+- [ ] AWS region: `________________________`
+- [ ] Current EKS version: `________________________`
+- [ ] Target EKS version: `________________________`
+- [ ] Upgrade type selected: `in-place / blue-green`
+- [ ] Planned maintenance window: `________________________`
+- [ ] Change record / ticket: `________________________`
+- [ ] Primary owner: `________________________`
+- [ ] Approver: `________________________`
+- [ ] Rollback or failover owner: `________________________`
 
-- Identify all node types: managed node groups, self-managed nodes, Karpenter, Fargate.
-- Inventory core add-ons: `vpc-cni`, `CoreDNS`, `kube-proxy`, `EBS CSI`, `EFS CSI`.
-- Inventory platform controllers: AWS Load Balancer Controller, Cluster Autoscaler or Karpenter, `external-dns`, `cert-manager`, `metrics-server`, service mesh, logging/monitoring agents, security agents.
-- Identify all CRDs, operators, admission webhooks, and stateful workloads.
+## 1. Strategy and Change Readiness
 
-## 3. Build a compatibility matrix
+- [ ] Confirm the current Kubernetes/EKS version and exact target version.
+- [ ] Confirm the upgrade path is supported by EKS.
+- [ ] Confirm the upgrade will be performed one minor version at a time.
+- [ ] Decide and document whether the upgrade is `in-place` or `blue-green`.
+- [ ] Document the rollback strategy.
+- [ ] Confirm stakeholders understand that EKS control plane downgrade is not supported.
+- [ ] Define go/no-go criteria.
+- [ ] Schedule and approve the maintenance window.
+- [ ] Freeze unrelated infrastructure and application changes during the upgrade window.
 
-- Review AWS EKS release notes for the target version.
-- Review upstream Kubernetes API deprecations and removals for that version.
-- Verify every add-on/controller supports the target cluster version.
-- Verify AMI/OS compatibility for worker nodes, including custom AMIs, Bottlerocket, AL2/AL2023, GPU/device plugins, and bootstrap method.
-- Check IRSA/Pod Identity and IAM permissions required by upgraded components.
+## 2. Cluster Inventory
 
-## 4. Scan for breaking API usage
+- [ ] Inventory worker platform types in use.
+- [ ] Managed node groups documented.
+- [ ] Self-managed node groups documented.
+- [ ] Karpenter usage documented.
+- [ ] Fargate profiles documented.
+- [ ] Current node AMIs and OS families documented.
+- [ ] Core add-ons documented: `vpc-cni`, `CoreDNS`, `kube-proxy`.
+- [ ] Storage drivers documented: `EBS CSI`, `EFS CSI`.
+- [ ] Platform controllers documented: AWS Load Balancer Controller, Cluster Autoscaler or Karpenter, `external-dns`, `cert-manager`, `metrics-server`.
+- [ ] Observability and security agents documented.
+- [ ] Service mesh components documented, if used.
+- [ ] All CRDs documented.
+- [ ] All operators documented.
+- [ ] All admission webhooks documented.
+- [ ] Stateful workloads and storage dependencies documented.
 
-- Check for deprecated or removed Kubernetes APIs with tools like `kubent` or `pluto`.
-- Pay special attention to:
-- old beta APIs
-- CRDs and webhooks
-- ingress resources
-- PDBs
-- HPA versions
-- PodSecurityPolicy removal on older upgrade paths
-- Confirm Helm charts and operators use APIs supported by the target version.
+## 3. Compatibility Validation
 
-## 5. Validate cluster health before touching it
+- [ ] Review AWS EKS release notes for the target version.
+- [ ] Review upstream Kubernetes deprecations and removals for the target version.
+- [ ] Confirm all EKS managed add-ons support the target version.
+- [ ] Confirm all Helm charts and controllers support the target version.
+- [ ] Confirm CRDs are compatible with the target version.
+- [ ] Confirm webhooks are compatible with the target version.
+- [ ] Confirm AMI and OS compatibility for all worker node types.
+- [ ] Confirm compatibility for AL2, AL2023, Bottlerocket, or custom AMIs as applicable.
+- [ ] Confirm GPU workloads and device plugins are compatible, if used.
+- [ ] Confirm bootstrap method compatibility for node provisioning.
+- [ ] Confirm IRSA or Pod Identity dependencies remain valid after upgrade.
+- [ ] Confirm IAM permissions required by upgraded add-ons and controllers.
 
-- All nodes should be `Ready`.
-- No failing system pods in `kube-system`.
-- No unresolved incidents, high error rates, or persistent `CrashLoopBackOff` / `Pending` pods.
-- Review PodDisruptionBudgets and drain behavior so worker replacement does not stall.
-- Confirm enough spare capacity for rolling node upgrades.
-- Check EC2 quotas, subnet free IPs, ENI limits, and autoscaling headroom.
+## 4. API Deprecation and Breaking Change Review
 
-## 6. Back up and verify recovery
+- [ ] Run a deprecated API scan using `kubent`, `pluto`, or equivalent.
+- [ ] Review findings for removed or deprecated beta APIs.
+- [ ] Review Ingress API usage.
+- [ ] Review HPA API usage.
+- [ ] Review PodDisruptionBudget API usage.
+- [ ] Review CRD API versions.
+- [ ] Review webhook API versions.
+- [ ] Confirm PodSecurityPolicy dependencies are removed where applicable.
+- [ ] Confirm no application manifests rely on APIs removed in the target version.
+- [ ] Confirm no Helm release templates render removed APIs for the target version.
 
-- Back up cluster resources and workload state.
-- For stateful apps, ensure EBS/EFS/RDS snapshots or equivalent backups exist.
-- Save current add-on versions, Helm values, launch template versions, and IaC state.
-- Test restore procedures. A backup without a restore test is not enough.
+## 5. Pre-Upgrade Health Validation
 
-## 7. Rehearse in non-production
+- [ ] Confirm all cluster nodes are `Ready`.
+- [ ] Confirm no critical pods are failing in `kube-system`.
+- [ ] Confirm there are no unresolved production incidents.
+- [ ] Confirm there are no sustained `CrashLoopBackOff` workloads requiring remediation.
+- [ ] Confirm there are no critical `Pending` pods caused by scheduling or capacity issues.
+- [ ] Review PodDisruptionBudgets for drain safety.
+- [ ] Confirm node draining can complete without violating workload availability requirements.
+- [ ] Confirm autoscaling headroom exists for rolling node replacement.
+- [ ] Confirm EC2 instance quotas are sufficient.
+- [ ] Confirm subnet free IP capacity is sufficient.
+- [ ] Confirm ENI/IP allocation capacity is sufficient.
+- [ ] Confirm load balancer, volume, and other AWS service quotas are sufficient if relevant.
 
-- Run the same upgrade path in staging or a like-for-like lower environment.
-- Validate ingress, DNS, storage, autoscaling, service mesh, monitoring, and application smoke tests.
-- Capture pre-upgrade baselines so regressions are easy to spot.
+## 6. Backup and Recovery Readiness
 
-## 8. Prepare the upgrade order
+- [ ] Back up cluster manifests, Helm values, and infrastructure configuration.
+- [ ] Capture current versions of all add-ons and controllers.
+- [ ] Capture current launch template versions or node configuration.
+- [ ] Verify IaC source of truth is current and recoverable.
+- [ ] Confirm backups exist for all stateful services.
+- [ ] Confirm EBS snapshots exist where required.
+- [ ] Confirm EFS backup or recovery strategy exists where required.
+- [ ] Confirm RDS or external data store backups exist where required.
+- [ ] Test and document restore steps.
+- [ ] Confirm restore validation was completed successfully.
 
-- Upgrade the EKS control plane first.
-- Upgrade EKS managed add-ons next.
-- Upgrade worker nodes after that.
-- Then upgrade dependent controllers and validate workloads.
-- Use checkpoints between each phase before proceeding.
+## 7. Non-Production Rehearsal
 
-## 9. Prepare operations and communications
+- [ ] Rehearse the same upgrade path in a lower environment.
+- [ ] Match production architecture closely enough for the rehearsal to be meaningful.
+- [ ] Validate ingress after rehearsal.
+- [ ] Validate DNS after rehearsal.
+- [ ] Validate storage attachment and persistence after rehearsal.
+- [ ] Validate autoscaling after rehearsal.
+- [ ] Validate service mesh behavior after rehearsal, if used.
+- [ ] Validate observability pipeline after rehearsal.
+- [ ] Run application smoke tests after rehearsal.
+- [ ] Record issues found in rehearsal and confirm they are resolved.
+- [ ] Capture pre-upgrade and post-upgrade baseline metrics.
 
-- Notify application owners and on-call teams.
-- Freeze unrelated deployments during the upgrade window.
-- Ensure dashboards, logs, alerts, and responders are ready before starting.
+## 8. Upgrade Sequence Prepared
 
-## Hard blockers I would not ignore
+- [ ] Document the exact execution order.
+- [ ] Control plane upgrade step prepared.
+- [ ] EKS managed add-on upgrade step prepared.
+- [ ] Worker node upgrade step prepared.
+- [ ] Dependent controller upgrade step prepared.
+- [ ] Validation checkpoint after each phase defined.
+- [ ] Node rotation and drain procedure documented.
+- [ ] Surge or spare capacity plan documented.
+- [ ] Post-upgrade verification commands and dashboards prepared.
 
-- Deprecated APIs still in use
-- Add-ons/controllers not compatible with the target version
-- No tested restore path
-- No spare capacity for node rotation
-- PDBs that block node drains
-- No realistic rollback/failover plan
+## 9. Operations and Communications
+
+- [ ] Notify application owners.
+- [ ] Notify on-call and incident response teams.
+- [ ] Confirm operator coverage during the upgrade window.
+- [ ] Confirm escalation path is documented.
+- [ ] Confirm monitoring dashboards are ready.
+- [ ] Confirm alerting is enabled and reviewed.
+- [ ] Confirm log aggregation and audit visibility are available.
+- [ ] Confirm a communication channel is active for live upgrade coordination.
+
+## 10. Hard Stop Conditions
+
+- [ ] No deprecated APIs remain in active use for the target version.
+- [ ] No incompatible add-ons or controllers remain.
+- [ ] A tested restore or failover path exists.
+- [ ] Sufficient node replacement capacity exists.
+- [ ] PodDisruptionBudgets will not block required node drains.
+- [ ] Rollback or failover plan is realistic and approved.
+
+## Go / No-Go Signoff
+
+- [ ] Technical readiness reviewed.
+- [ ] Application readiness reviewed.
+- [ ] Business approval received.
+- [ ] Final go decision approved.
+
+## Notes
+
+- Date executed: `________________________`
+- Executed by: `________________________`
+- Outcome: `________________________`
+- Follow-up actions: `________________________`
