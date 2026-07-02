@@ -2896,7 +2896,7 @@ or
 helm dep update parentchart/
 
 # Helm Install
-helm install myapp1 parentchart/ --atomic
+helm install myapp1 parentchart/ --rollback-on-failure
 
 # Helm List
 helm list
@@ -2959,7 +2959,7 @@ or
 helm dep update parentchart/
 
 # Helm Install
-helm install myapp1 parentchart/ --atomic
+helm install myapp1 parentchart/ --rollback-on-failure
 
 # Helm List
 helm list
@@ -3003,7 +3003,7 @@ or
 helm dep update parentchart/
 
 # Helm Install
-helm install myapp1 parentchart/ --atomic
+helm install myapp1 parentchart/ --rollback-on-failure
 
 # Helm List
 helm list
@@ -3088,7 +3088,7 @@ or
 helm dep update parentchart/
 
 # Helm Install
-helm install myapp1 parentchart/ --atomic
+helm install myapp1 parentchart/ --rollback-on-failure
 
 # Helm List
 helm list
@@ -3173,7 +3173,7 @@ tags:
   backend: false
 
 # Helm Install
-helm install myapp1 parentchart/ --atomic
+helm install myapp1 parentchart/ --rollback-on-failure
 
 # List Pods
 kubectl get pods
@@ -3185,7 +3185,7 @@ Observation:
  ## Step-04: Usecase-2: Backend True and Frontend false
  ```t
 # Helm Install
-helm upgrade myapp1 parentchart/ --atomic --set tags.backend=true
+helm upgrade myapp1 parentchart/ --rollback-on-failure --set tags.backend=true
 
 # List Pods
 kubectl get pods
@@ -3196,7 +3196,7 @@ Observation:
  ## Step-05: Usecase-2: Backend True and Frontend True
  ```t
 # Helm Install
-helm upgrade myapp1 parentchart/ --atomic --set tags.backend=true --set tags.frontend=true
+helm upgrade myapp1 parentchart/ --rollback-on-failure --set tags.backend=true --set tags.frontend=true
 
 # List Pods
 kubectl get pods
@@ -3268,7 +3268,7 @@ or
 helm dep update parentchart/
 
 # Helm Install
-helm install myapp1 parentchart/ --atomic
+helm install myapp1 parentchart/ --rollback-on-failure
 
 # Helm List
 helm list
@@ -3400,7 +3400,7 @@ replicas: {{ .Values.global.replicaCount }}
 cd parentchart
 
 # Helm Install
-helm install myapp1 . --atomic
+helm install myapp1 . --rollback-on-failure
 
 # Verify Pods for all 3 charts
 kubectl get pods
@@ -3458,7 +3458,7 @@ data:
 cd parentchart
 
 # Helm Install
-helm install myapp1 . --atomic
+helm install myapp1 . --rollback-on-failure
 
 # Helm List
 helm list
@@ -3488,7 +3488,7 @@ helm uninstall myapp1
 cd parentchart
 
 # Helm Install
-helm install myapp1 . --atomic --set tags.frontend=false
+helm install myapp1 . --rollback-on-failure --set tags.frontend=false
 
 # Review Configmap
 kubectl get cm myapp1-parentchart-import-explicit -o yaml
@@ -3558,7 +3558,7 @@ data:
 cd parentchart
 
 # Helm Install
-helm install myapp1 . --atomic
+helm install myapp1 . --rollback-on-failure
 
 # Helm List
 helm list
@@ -3588,12 +3588,12 @@ helm uninstall myapp1
 cd parentchart
 
 # Helm Install (When mychart2 is disabled)
-helm install myapp1 . --atomic --set tags.backend=false
+helm install myapp1 . --rollback-on-failure --set tags.backend=false
 Observation:
 Should fail with error 
 
 ## Error
-Kalyans-Mac-mini:parentchart kalyanreddy$ helm install myapp1 . --atomic --set tags.backend=false
+Kalyans-Mac-mini:parentchart kalyanreddy$ helm install myapp1 . --rollback-on-failure --set tags.backend=false
 Error: INSTALLATION FAILED: template: parentchart/templates/configmap.yaml:6:25: executing "parentchart/templates/configmap.yaml" at <.Values.mychart2service.type>: nil pointer evaluating interface {}.type
 ```
 
@@ -3661,7 +3661,7 @@ URL: https://helm.sh/docs/helm/helm_lint/
 4. If it encounters issues that break with convention or recommendation, it will emit [WARNING] messages.
 
 # Install Helm Release
-helm install myapp1 . --atomic
+helm install myapp1 . --rollback-on-failure
 
 # List Pods and Services
 kubectl get pods
@@ -3816,12 +3816,12 @@ helm repo add stacksimplify https://stacksimplify.github.io/helm-charts/
 helm repo list
 
 # Helm Install dev101
-helm install dev101 stacksimplify/mychart1 --atomic
-helm upgrade dev101 stacksimplify/mychart1 --atomic --set replicaCount=2
-helm upgrade dev101 stacksimplify/mychart1 --atomic --set replicaCount=3
+helm install dev101 stacksimplify/mychart1 --rollback-on-failure
+helm upgrade dev101 stacksimplify/mychart1 --rollback-on-failure --set replicaCount=2
+helm upgrade dev101 stacksimplify/mychart1 --rollback-on-failure --set replicaCount=3
 
 # Helm Install dev102
-helm install dev102 stacksimplify/mychart2 --atomic
+helm install dev102 stacksimplify/mychart2 --rollback-on-failure
 
 # List Helm Releases
 helm list
@@ -4044,7 +4044,7 @@ spec:
 cd hooksdemo1
 
 # Install Helm Release
-helm install myapp101 . --atomic
+helm install myapp101 . --rollback-on-failure
 
 # List Helm Release
 helm list
